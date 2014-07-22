@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello WebSocket</title>
+</head>
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+<div>
+    <div>
+        <button id="connect" >Connect</button>
+        <button id="disconnect" disabled="disabled" >Disconnect</button>
+    </div>
+    <div id="conversationDiv">
+        <label>What is your name?</label><input type="text" id="name" />
+        <button id="sendName" >Send</button>
+        <p id="response"></p>
+    </div>
+</div>
+<div id="logdiv"></div>
+<script type="application/dart" src="index.dart"></script>
+    <script type="text/javascript" src="packages/browser/dart.js"></script>
+</body>
+</html>
