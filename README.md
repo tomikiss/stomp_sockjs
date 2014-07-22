@@ -1,4 +1,3 @@
-stomp_sockjs
-============
+# Stomp Sockjs client
 
-Stomp connector over Sockjs in Dart
+This is a Dart client library for STOMP over [SockJS](http://sockjs.org).
