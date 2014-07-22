@@ -1,0 +1,7 @@
+name: stomp_sockjs
+version: 0.0.1
+author: Tamas Kiss
+description: A pub package
+dependencies:
+  sockjs_client: any
+  stomp: any
