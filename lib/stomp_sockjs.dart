@@ -8,24 +8,26 @@ import "package:sockjs_client/sockjs_client.dart" as SockJS;
 
 SockJS.Client _socket;
 Future<StompClient> connect(String url, {
-        String host, 
-        String login, 
-        String passcode, 
+        String host,
+        String login,
+        String passcode,
         List<int> heartbeat,
         List<String> protocolsWhiteList,
-        void onDisconnect(),
-        void onError(String message, String detail, [Map<String, String> headers]),
+        void onDisconnect(StompClient client),
+        void onError(StompClient client, String message, String detail, [Map<String, String> headers]),
         void onConnectionError(error, stacktrace),
+        void onClose(),
         bool debugFlag:false
       }) {
-        Future<Object> waitingForConnection = _SockDartConnector.start(url, protocolsWhiteList, debugFlag);
+        Future<Object> waitingForConnection = _SockDartConnector.start(url, protocolsWhiteList, debugFlag,
+          onClose: onClose);
 
         return waitingForConnection.then((connector){
-             print("Got SockJS/SockDart connection");
+            if (debugFlag) print("Got SockJS/SockDart connection");
             Future<StompClient> waitingForStompClientHolder = StompClient.connect(connector,
                 host: host,
-                login: login, 
-                passcode: passcode, 
+                login: login,
+                passcode: passcode,
                 heartbeat: heartbeat,
                 onDisconnect: onDisconnect,
                 onError: onError).catchError((e) {
@@ -33,7 +35,7 @@ Future<StompClient> connect(String url, {
                   onConnectionError(e, e);
                 });
 
-            return(waitingForStompClientHolder);    
+            return(waitingForStompClientHolder);
         });
 }
 
@@ -42,29 +44,31 @@ class _SockDartConnector extends StringStompConnector {
   final SockJS.Client _socket;
   Completer<_SockDartConnector> _starting = new Completer();
 
-    static Future<_SockDartConnector> start(String url, List<String> protocolsWhiteList, bool debugFlag) {
+    static Future<_SockDartConnector> start(String url, List<String> protocolsWhiteList, bool debugFlag, {
+        void onClose()} ) {
 
       SockJS.Client sockJs = new SockJS.Client(url, protocolsWhitelist:protocolsWhiteList, debug:debugFlag, devel:true);
 
-      _SockDartConnector connector = new _SockDartConnector(sockJs);
+      _SockDartConnector connector = new _SockDartConnector(sockJs, onClose:onClose);
 
       return connector._starting.future;
   }
 
-  _SockDartConnector(this._socket) {
+  _SockDartConnector(this._socket, {onClose()}) {
+    this.onClose = onClose;
     _init();
   }
 
 
   void _init() {
     _socket.onOpen.listen((_) {
-      print("here is onOpen");
+      if (_socket.debug) print("here is onOpen");
       _starting.complete(this);
       _starting = null;
     });
     ///Note: when this method is called, onString/onError/onClose are not set yet
     _socket.onMessage.listen((event) {
-      print("here is onMessage");
+      if (_socket.debug) print("here is onMessage");
       final data = event.data;
       if (data != null) {
         //TODO: handle Blob and TypedData more effectively
@@ -80,7 +84,7 @@ class _SockDartConnector extends StringStompConnector {
     });
     _socket.onClose.listen((event) {
       if (onClose != null) onClose();
-    }); 
+    });
 
   }
 
