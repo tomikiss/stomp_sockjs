@@ -19,6 +19,7 @@ Future<StompClient> connect(String url, {
         void onClose(),
         bool debugFlag:false
       }) {
+        SockJS.WebSocketTransport.probeSecure = url.startsWith('https');
         Future<Object> waitingForConnection = _SockDartConnector.start(url, protocolsWhiteList, debugFlag,
           onClose: onClose);
 
